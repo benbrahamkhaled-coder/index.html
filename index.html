@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitPulse - Fitness & Nutrition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0fdf4', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen pb-20">
+
+    <!-- En-tête -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="bg-brand-500 text-slate-950 p-2 rounded-xl font-black text-xl flex items-center justify-center">
+                    <i data-lucide="activity" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">FitPulse</h1>
+                    <p class="text-xs text-slate-400">Suivi Fitness & Nutrition</p>
+                </div>
+            </div>
+            <button onclick="resetData()" class="text-xs text-slate-400 hover:text-red-400 border border-slate-700 px-2.5 py-1.5 rounded-lg transition">
+                Réinitialiser
+            </button>
+        </div>
+    </header>
+
+    <!-- Contenu Principal -->
+    <main class="max-w-md mx-auto px-4 py-4 space-y-6">
+
+        <!-- SECTION 1 : DASHBOARD / OBJECTIFS -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-bold text-base flex items-center gap-2">
+                    <i data-lucide="target" class="w-5 h-5 text-brand-500"></i> Objectifs du jour
+                </h2>
+                <span class="text-xs bg-brand-500/10 text-brand-500 font-semibold px-2.5 py-1 rounded-full">Actif</span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800/60">
+                    <span class="text-xs text-slate-400">Calories consommées</span>
+                    <div class="text-xl font-black mt-1"><span id="val-cals">0</span> <span class="text-xs font-normal text-slate-400">/ 2500 kcal</span></div>
+                </div>
+                <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800/60">
+                    <span class="text-xs text-slate-400">Protéines</span>
+                    <div class="text-xl font-black mt-1 text-brand-500"><span id="val-prot">0</span> <span class="text-xs font-normal text-slate-400">/ 160g</span></div>
+                </div>
+            </div>
+
+            <!-- Barre de progression Hydratation -->
+            <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-300 flex items-center gap-1.5"><i data-lucide="droplet" class="w-4 h-4 text-blue-400"></i> Hydratation</span>
+                    <span class="font-bold"><span id="val-water">0</span> / 3.5 L</span>
+                </div>
+                <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
+                    <div id="water-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button onclick="addWater(0.25)" class="flex-1 bg-slate-800 hover:bg-slate-700 py-1.5 rounded-lg text-xs font-medium transition">+ 250 ml</button>
+                    <button onclick="addWater(0.5)" class="flex-1 bg-slate-800 hover:bg-slate-700 py-1.5 rounded-lg text-xs font-medium transition">+ 500 ml</button>
+                    <button onclick="resetWater()" class="px-3 bg-slate-800/50 hover:bg-red-500/20 hover:text-red-400 py-1.5 rounded-lg text-xs transition"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 : NUTRITION & REPAS -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+            <h2 class="font-bold text-base flex items-center gap-2 mb-3">
+                <i data-lucide="utensils" class="w-5 h-5 text-emerald-500"></i> Ajouter un aliment / Repas
+            </h2>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs text-slate-400 mb-1 block">Aliment rapide ou personnalisé</label>
+                    <input type="text" id="food-name" placeholder="Ex: Poulet & Riz, Œufs..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1 block">Calories (kcal)</label>
+                        <input type="number" id="food-cals" placeholder="Ex: 450" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1 block">Protéines (g)</label>
+                        <input type="number" id="food-prot" placeholder="Ex: 40" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+                <button onclick="addFood()" class="w-full bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Enregistrer le repas
+                </button>
+            </div>
+
+            <!-- Liste des repas du jour -->
+            <div class="mt-4 pt-4 border-t border-slate-800">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Repas consommés aujourd'hui</h3>
+                <div id="food-list" class="space-y-2 max-h-40 overflow-y-auto pr-1">
+                    <p class="text-xs text-slate-500 italic text-center py-2">Aucun repas enregistré pour le moment.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 : ENTRAÎNEMENT & CHRONO -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+            <h2 class="font-bold text-base flex items-center gap-2 mb-3">
+                <i data-lucide="dumbbell" class="w-5 h-5 text-amber-500"></i> Chrono & Repos Entraînement
+            </h2>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-center space-y-3">
+                <div id="timer-display" class="text-4xl font-black tracking-wider text-amber-400">01:00</div>
+                <div class="flex justify-center gap-2">
+                    <button onclick="startTimer(60)" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs">Repos 1 min</button>
+                    <button onclick="startTimer(90)" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs">Repos 1m30</button>
+                    <button onclick="stopTimer()" class="bg-red-500/20 text-red-400 hover:bg-red-500/30 px-3 py-1.5 rounded-lg text-xs">Stop</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Script Logique Application -->
+    <script>
+        // Initialisation des icônes Lucide
+        lucide.createIcons();
+
+        // État de l'application (localStorage)
+        let state = JSON.parse(localStorage.getItem('fitpulse_state')) || {
+            calories: 0,
+            protein: 0,
+            water: 0,
+            foods: []
+        };
+
+        function updateUI() {
+            document.getElementById('val-cals').innerText = state.calories;
+            document.getElementById('val-prot').innerText = state.protein;
+            document.getElementById('val-water').innerText = state.water.toFixed(2);
+            
+            const waterPercent = Math.min((state.water / 3.5) * 100, 100);
+            document.getElementById('water-bar').style.width = waterPercent + '%';
+
+            const foodListEl = document.getElementById('food-list');
+            if (state.foods.length === 0) {
+                foodListEl.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-2">Aucun repas enregistré pour le moment.</p>`;
+            } else {
+                foodListEl.innerHTML = state.foods.map((f, index) => `
+                    <div class="flex justify-between items-center bg-slate-950/40 px-3 py-2 rounded-xl text-xs border border-slate-800/40">
+                        <div>
+                            <span class="font-bold block text-slate-200">${f.name}</span>
+                            <span class="text-slate-400">${f.cals} kcal • ${f.prot}g prot</span>
+                        </div>
+                        <button onclick="removeFood(${index})" class="text-slate-500 hover:text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            }
+            localStorage.setItem('fitpulse_state', JSON.stringify(state));
+        }
+
+        function addWater(amount) {
+            state.water += amount;
+            updateUI();
+        }
+
+        function resetWater() {
+            state.water = 0;
+            updateUI();
+        }
+
+        function addFood() {
+            const nameInput = document.getElementById('food-name');
+            const calsInput = document.getElementById('food-cals');
+            const protInput = document.getElementById('food-prot');
+
+            const name = nameInput.value.trim() || 'Repas';
+            const cals = parseInt(calsInput.value) || 0;
+            const prot = parseInt(protInput.value) || 0;
+
+            state.foods.unshift({ name, cals, prot });
+            state.calories += cals;
+            state.protein += prot;
+
+            nameInput.value = '';
+            calsInput.value = '';
+            protInput.value = '';
+
+            updateUI();
+        }
+
+        function removeFood(index) {
+            const item = state.foods[index];
+            state.calories -= item.cals;
+            state.protein -= item.prot;
+            state.foods.splice(index, 1);
+            updateUI();
+        }
+
+        function resetData() {
+            if (confirm('Voulez-vous réinitialiser toutes les données du jour ?')) {
+                state = { calories: 0, protein: 0, water: 0, foods: [] };
+                updateUI();
+            }
+        }
+
+        // Chrono / Minuteur
+        let timerInterval = null;
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            let timeLeft = seconds;
+            const display = document.getElementById('timer-display');
+            
+            timerInterval = setInterval(() => {
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                display.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    display.innerText = "C'est reparti !";
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-display').innerText = "01:00";
+        }
+
+        // Lancement initial
+        updateUI();
+    </script>
+</body>
+</html>
